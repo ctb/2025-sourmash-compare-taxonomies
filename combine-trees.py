@@ -10,7 +10,8 @@ from taxburst import checks, taxinfo
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('treelist', nargs='+', help='tree files in taxburst JSON format')
+    p.add_argument('treelist', nargs='+',
+                   help='tree files in taxburst JSON format')
     p.add_argument('-o', '--output-json', required=True)
     
     args = p.parse_args()
@@ -39,7 +40,6 @@ def main():
     first_tree_copy = checks.copy_tree(treelist[0])
 
     aug_tree = checks.augment_tree(treelist[0], treelist[1:], names_to_nodes)
-
     aug_nodes = checks.collect_all_nodes(aug_tree)
 
     # check that all names are in augmented tree
@@ -49,9 +49,8 @@ def main():
     missing = set(names_to_nodes) - found
     assert not missing, len(missing)
 
-    first_tree = checks.collect_all_nodes(treelist[0])
-
     # check that we didn't change initial tree...
+    first_tree = checks.collect_all_nodes(treelist[0])
     assert checks.trees_are_equal(first_tree, first_tree_copy)
 
     checks.check_structure(treelist[0])
