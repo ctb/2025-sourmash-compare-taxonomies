@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 
 import taxburst
-from taxburst import checks, taxinfo
+from taxburst import checks, taxinfo, tree_utils
 
 
 def main():
@@ -37,10 +37,10 @@ def main():
     print(f"loaded {len(names_to_nodes)} distinct names across {total_nodes} nodes in {len(treelist)} trees.")
 
     # make copy of first tree...
-    first_tree_copy = checks.copy_tree(treelist[0])
+    first_tree_copy = tree_utils.copy_tree(treelist[0])
 
-    aug_tree = checks.augment_tree(treelist[0], treelist[1:], names_to_nodes)
-    aug_nodes = checks.collect_all_nodes(aug_tree)
+    aug_tree = tree_utils.augment_tree(treelist[0], treelist[1:])
+    aug_nodes = tree_utils.collect_all_nodes(aug_tree)
 
     # check that all names are in augmented tree
     found = set()
