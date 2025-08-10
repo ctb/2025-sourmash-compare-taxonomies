@@ -5,7 +5,20 @@ import json
 from collections import defaultdict
 
 import taxburst
-from taxburst import checks, taxinfo
+from taxburst import checks
+
+
+taxinfo_ranks = [
+    "superkingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "strain",
+    "genome",
+]
 
 
 def main():
@@ -73,7 +86,7 @@ def main():
     print(f"{'rank':<15} {'name':<30}  {'diff':>4}")
     print(f"------------    ------------                    ----")
 
-    ranks = taxinfo.ranks
+    ranks = list(taxinfo_ranks)
     ranks.reverse()
     if args.lowest_rank:
         idx = ranks.index(args.lowest_rank)
