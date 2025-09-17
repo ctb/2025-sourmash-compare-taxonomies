@@ -25,7 +25,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('tree1_json')
     p.add_argument('tree2_json')
-    p.add_argument("--output", required=True, help="Path to output CSV file")
+    p.add_argument("--output", help="Path to output CSV file")
     p.add_argument('--diff-fraction-tolerance', type=float, default=.01)
     p.add_argument('--remove-unclassified', action='store_true',
                    help="remove top-level unclassified before calculating fractions of total")
@@ -150,8 +150,9 @@ def main():
                     "sourmash": f2 * 100
                 })
 
-        df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
-        df_out.to_csv(args.output, index=False)
+        if args.output:
+            df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
+            df_out.to_csv(args.output, index=False)
 
 if __name__ == '__main__':
     sys.exit(main())
