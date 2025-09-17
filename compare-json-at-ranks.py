@@ -25,7 +25,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('tree1_json')
     p.add_argument('tree2_json')
-    p.add_argument("--output", required=True, help="Path to output CSV file")
+    p.add_argument("--output", help="Path to output CSV file")
     p.add_argument('--diff-fraction-tolerance', type=float, default=.01)
     p.add_argument('--remove-unclassified', action='store_true',
                    help="remove top-level unclassified before calculating fractions of total")
@@ -47,21 +47,32 @@ def main():
     print(f"loaded {len(nodes2)} nodes from '{args.tree2_json}'")
 
     if args.remove_unclassified:
-        nodes1_filt = []
-        for n in nodes1:
+        found_unclassified = False
+        tree1_filt = []
+        for n in tree1:
             if n["name"] == 'unclassified':
                 print(f"removing 'unclassified' from first")
+                found_unclassified = True
             else:
-                nodes1_filt.append(n)
-        nodes1 = nodes1_filt
+                tree1_filt.append(n)
 
-        nodes2_filt = []
-        for n in nodes2:
+        tree2_filt = []
+        for n in tree2:
             if n["name"] == 'unclassified':
                 print(f"removing 'unclassified' from second")
+                found_unclassified = True
             else:
-                nodes2_filt.append(n)
-        nodes2 = nodes2_filt
+                tree2_filt.append(n)
+
+        tree1 = tree1_filt
+        tree2 = tree2_filt
+
+        nodes1 = checks.collect_all_nodes(tree1)
+        nodes2 = checks.collect_all_nodes(tree2)
+        
+        if not found_unclassified:
+            print("ERROR: --remove-unclassified was specified, but no unclassified was found. Adjust your expectations, please.")
+            assert 0, "you were wrong, dude"
 
     total_count_1 = sum([float(n["count"]) for n in tree1])
     total_count_2 = sum([float(n["count"]) for n in tree2])
@@ -139,8 +150,9 @@ def main():
                     "sourmash": f2 * 100
                 })
 
-        df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
-        df_out.to_csv(args.output, index=False)
+        if args.output:
+            df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
+            df_out.to_csv(args.output, index=False)
 
 if __name__ == '__main__':
     sys.exit(main())
