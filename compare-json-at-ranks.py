@@ -140,18 +140,18 @@ def main():
         
         diffs.sort(key=lambda x: -x[4])
         for (rank, name, f1, f2, diff) in diffs:
+            rows.append({
+                "rank": rank,
+                "name": name,
+                "diff": (f1 - f2) * 100,
+                "first_tax": f1 * 100,
+                "second_tax": f2 * 100
+            })
             if diff > args.diff_fraction_tolerance:
                 print(f"{rank:<15} {name:<30} {(f1 - f2)*100:>4.1f}%    {f1*100:>4.1f}% / {f2*100:>4.1f}%")
-                rows.append({
-                    "rank": rank,
-                    "name": name,
-                    "diff": (f1 - f2) * 100,
-                    "singleM": f1 * 100,
-                    "sourmash": f2 * 100
-                })
 
         if args.output:
-            df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
+            df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "first_tax", "second_tax"])
             df_out.to_csv(args.output, index=False)
 
 if __name__ == '__main__':
