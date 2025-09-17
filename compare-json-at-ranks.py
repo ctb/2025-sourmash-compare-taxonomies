@@ -3,7 +3,7 @@ import sys
 import argparse
 import json
 from collections import defaultdict
-
+import pandas as pd
 import taxburst
 from taxburst import checks
 
@@ -25,6 +25,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('tree1_json')
     p.add_argument('tree2_json')
+    p.add_argument("--output", required=True, help="Path to output CSV file")
     p.add_argument('--diff-fraction-tolerance', type=float, default=.01)
     p.add_argument('--remove-unclassified', action='store_true',
                    help="remove top-level unclassified before calculating fractions of total")
@@ -102,7 +103,7 @@ def main():
     if args.lowest_rank:
         idx = ranks.index(args.lowest_rank)
         ranks = ranks[idx:]
-
+    rows = []
     for rank in ranks:
         if args.rank and args.rank != rank:
             continue
@@ -136,11 +137,21 @@ def main():
             f2 = node2["count"] / total_count_2
             diffs.append((rank, name, f1, f2, abs(f1-f2)))
 
+        
         diffs.sort(key=lambda x: -x[4])
         for (rank, name, f1, f2, diff) in diffs:
             if diff > args.diff_fraction_tolerance:
                 print(f"{rank:<15} {name:<30} {(f1 - f2)*100:>4.1f}%    {f1*100:>4.1f}% / {f2*100:>4.1f}%")
+                rows.append({
+                    "rank": rank,
+                    "name": name,
+                    "diff": (f1 - f2) * 100,
+                    "singleM": f1 * 100,
+                    "sourmash": f2 * 100
+                })
 
+        df_out = pd.DataFrame(rows, columns=["rank", "name", "diff", "sourmash", "singleM"])
+        df_out.to_csv(args.output, index=False)
 
 if __name__ == '__main__':
     sys.exit(main())
